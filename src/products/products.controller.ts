@@ -17,13 +17,7 @@ import { catchError } from 'rxjs';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-const normalizeRpcError = (error: unknown): string | object => {
-  if (typeof error === 'string') return error;
-
-  if (typeof error === 'object' && error !== null) return error;
-
-  return { message: 'Unexpected microservice error' };
-};
+import { normalizeRpcError } from '@/common/exceptions/normalize-rcp-error';
 
 @Controller('products')
 export class ProductsController {
