@@ -8,7 +8,6 @@ import {
   ParseUUIDPipe,
   Query,
   Patch,
-  Logger,
 } from '@nestjs/common';
 import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
