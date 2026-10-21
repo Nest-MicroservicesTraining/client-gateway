@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { envs } from '../config';
+import { envs } from './config';
 import { RpcCustomExceptionFilter } from './common';
 
 const logger = new Logger('Main');

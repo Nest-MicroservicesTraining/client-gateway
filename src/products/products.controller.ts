@@ -11,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { PRODUCTS_SERVICE } from '../../config';
+import { NATS_SERVICE } from '../config';
 import { PaginationDto } from '@/common';
 import { catchError } from 'rxjs';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -21,37 +21,31 @@ import { normalizeRpcError } from '@/common/exceptions/normalize-rcp-error';
 
 @Controller('products')
 export class ProductsController {
-  constructor(
-    @Inject(PRODUCTS_SERVICE) private readonly productsClient: ClientProxy,
-  ) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   createProduct(@Body() createProductDto: CreateProductDto) {
     // return 'Product created successfully';
 
-    return this.productsClient
-      .send({ cmd: 'create_product' }, createProductDto)
-      .pipe(
-        catchError((error: unknown) => {
-          throw new RpcException(normalizeRpcError(error));
-        }),
-      );
+    return this.client.send({ cmd: 'create_product' }, createProductDto).pipe(
+      catchError((error: unknown) => {
+        throw new RpcException(normalizeRpcError(error));
+      }),
+    );
   }
 
   @Get()
   findAllProducts(@Query() paginationDto: PaginationDto) {
-    return this.productsClient
-      .send({ cmd: 'find_all_products' }, paginationDto)
-      .pipe(
-        catchError((error: unknown) => {
-          throw new RpcException(normalizeRpcError(error));
-        }),
-      );
+    return this.client.send({ cmd: 'find_all_products' }, paginationDto).pipe(
+      catchError((error: unknown) => {
+        throw new RpcException(normalizeRpcError(error));
+      }),
+    );
   }
 
   @Get(':id')
   findOneById(@Param('id', ParseIntPipe) id: number) {
-    return this.productsClient.send({ cmd: 'find_one_product' }, { id }).pipe(
+    return this.client.send({ cmd: 'find_one_product' }, { id }).pipe(
       catchError((error: unknown) => {
         throw new RpcException(normalizeRpcError(error));
       }),
@@ -71,7 +65,7 @@ export class ProductsController {
 
   @Delete(':id')
   deleteProduct(@Param('id', ParseIntPipe) id: number) {
-    return this.productsClient.send({ cmd: 'remove_product' }, { id }).pipe(
+    return this.client.send({ cmd: 'remove_product' }, { id }).pipe(
       catchError((error: unknown) => {
         throw new RpcException(normalizeRpcError(error));
       }),
@@ -83,7 +77,7 @@ export class ProductsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() UpdateProductDto: UpdateProductDto,
   ) {
-    return this.productsClient
+    return this.client
       .send({ cmd: 'update_product' }, { id, ...UpdateProductDto })
       .pipe(
         catchError((error: unknown) => {

@@ -11,19 +11,17 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto, OrderPaginationDto, StatusDto } from './dto';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { ORDERS_SERVICE } from '../../config';
+import { NATS_SERVICE } from '../config';
 import { catchError } from 'rxjs';
 import { normalizeRpcError, PaginationDto } from '@/common';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(
-    @Inject(ORDERS_SERVICE) private readonly ordersService: ClientProxy,
-  ) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.send('createOrder', createOrderDto).pipe(
+    return this.client.send('createOrder', createOrderDto).pipe(
       catchError((error: unknown) => {
         throw new RpcException(normalizeRpcError(error));
       }),
@@ -32,7 +30,7 @@ export class OrdersController {
 
   @Get()
   findAll(@Query() orderPaginationDto: OrderPaginationDto) {
-    return this.ordersService.send('findAllOrders', orderPaginationDto).pipe(
+    return this.client.send('findAllOrders', orderPaginationDto).pipe(
       catchError((error: unknown) => {
         throw new RpcException(normalizeRpcError(error));
       }),
@@ -42,7 +40,7 @@ export class OrdersController {
 
   @Get('id/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersService.send('findOneOrder', { id }).pipe(
+    return this.client.send('findOneOrder', { id }).pipe(
       catchError((error: unknown) => {
         throw new RpcException(normalizeRpcError(error));
       }),
@@ -53,7 +51,7 @@ export class OrdersController {
     @Param() StatusDto: StatusDto,
     @Query() paginationDto: PaginationDto,
   ) {
-    return this.ordersService
+    return this.client
       .send('findAllOrders', { ...StatusDto, ...paginationDto })
       .pipe(
         catchError((error: unknown) => {
@@ -67,12 +65,10 @@ export class OrdersController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() statusDto: StatusDto,
   ) {
-    return this.ordersService
-      .send('changeOrderStatus', { id, ...statusDto })
-      .pipe(
-        catchError((error: unknown) => {
-          throw new RpcException(normalizeRpcError(error));
-        }),
-      );
+    return this.client.send('changeOrderStatus', { id, ...statusDto }).pipe(
+      catchError((error: unknown) => {
+        throw new RpcException(normalizeRpcError(error));
+      }),
+    );
   }
 }
