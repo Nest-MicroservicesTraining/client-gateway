@@ -33,6 +33,8 @@ async function bootstrap() {
 
   await app.listen(envs.PORT);
   logger.log(`Server is running on port ${envs.PORT}`);
+
+  console.log('Hola Mundo -primer cambio');
 }
 bootstrap()
   .then(() => {
